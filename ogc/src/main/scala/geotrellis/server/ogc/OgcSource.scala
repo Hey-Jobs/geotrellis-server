@@ -127,19 +127,16 @@ case class GeoTrellisOgcSource(
    * @param interval
    * @return
    */
-  def sourceForTime(interval: OgcTimeInterval): GeoTrellisRasterSource =
-    if (source.isTemporal) {
-      val defaultTime = timeInterval.getOrElse(interval).start
-      source.times.find { t =>
-        interval match {
-          case OgcTimeInterval(start, None, _)      => start == t
-          case OgcTimeInterval(start, Some(end), _) => start <= t && t < end
-          case _                                    => false
-        }
-      }.fold(sourceForTime(defaultTime))(sourceForTime)
-    } else {
-      source
-    }
+  def sourceForTime(interval: OgcTimeInterval): GeoTrellisRasterSource = {
+    val defaultTime = timeInterval.getOrElse(interval).start
+    source.times.find { t =>
+      interval match {
+        case OgcTimeInterval(start, None, _)      => start == t
+        case OgcTimeInterval(start, Some(end), _) => start <= t && t < end
+        case _                                    => false
+      }
+    }.fold(source)(sourceForTime)
+  }
 
   def sourceForTime(time: ZonedDateTime): GeoTrellisRasterSource =
     if (source.isTemporal) GeoTrellisRasterSource(dataPath, Some(time))
